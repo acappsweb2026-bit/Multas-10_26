@@ -1,0 +1,578 @@
+{
+  "entities": {
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Trusted administrator registry document keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the administrator.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verified administrator email address.",
+          "minLength": 3,
+          "maxLength": 254
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when admin record was created."
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "Driver": {
+      "title": "Driver",
+      "description": "Registered fleet driver with CNH and points tracking.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique driver identifier.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the record owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the driver.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "cpf": {
+          "type": "string",
+          "description": "Driver CPF document number.",
+          "minLength": 11,
+          "maxLength": 20
+        },
+        "cnhNumber": {
+          "type": "string",
+          "description": "National driver license number (CNH).",
+          "minLength": 5,
+          "maxLength": 30
+        },
+        "cnhCategory": {
+          "type": "string",
+          "description": "CNH category.",
+          "enum": ["A", "B", "C", "D", "E", "AB", "AC", "AD", "AE"],
+          "minLength": 1,
+          "maxLength": 5
+        },
+        "cnhExpiration": {
+          "type": "string",
+          "description": "CNH expiration date (YYYY-MM-DD).",
+          "minLength": 8,
+          "maxLength": 25
+        },
+        "currentPoints": {
+          "type": "number",
+          "description": "Current accumulated CNH points."
+        },
+        "status": {
+          "type": "string",
+          "description": "Driver license status.",
+          "enum": ["REGULAR", "ALERTA", "SUSPENSA", "CASSADA"],
+          "minLength": 1,
+          "maxLength": 20
+        },
+        "phone": {
+          "type": "string",
+          "description": "Driver phone number.",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "email": {
+          "type": "string",
+          "description": "Driver contact email.",
+          "minLength": 0,
+          "maxLength": 254
+        },
+        "assignedVehiclePlate": {
+          "type": "string",
+          "description": "Assigned vehicle plate.",
+          "minLength": 0,
+          "maxLength": 20
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last update timestamp."
+        }
+      },
+      "required": [
+        "id",
+        "ownerId",
+        "name",
+        "cpf",
+        "cnhNumber",
+        "cnhCategory",
+        "cnhExpiration",
+        "currentPoints",
+        "status",
+        "phone",
+        "email",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Vehicle": {
+      "title": "Vehicle",
+      "description": "Fleet vehicle registered via CRLV.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique vehicle identifier.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the record owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "plate": {
+          "type": "string",
+          "description": "Vehicle license plate.",
+          "minLength": 5,
+          "maxLength": 15
+        },
+        "renavam": {
+          "type": "string",
+          "description": "Vehicle RENAVAM code.",
+          "minLength": 5,
+          "maxLength": 20
+        },
+        "chassis": {
+          "type": "string",
+          "description": "Vehicle chassis VIN.",
+          "minLength": 5,
+          "maxLength": 30
+        },
+        "brandModel": {
+          "type": "string",
+          "description": "Vehicle brand and model.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "yearFabMod": {
+          "type": "string",
+          "description": "Manufacturing and model year.",
+          "minLength": 4,
+          "maxLength": 20
+        },
+        "vehicleType": {
+          "type": "string",
+          "description": "Classification of the vehicle.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "fuel": {
+          "type": "string",
+          "description": "Fuel type.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "color": {
+          "type": "string",
+          "description": "Vehicle color.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "ownerName": {
+          "type": "string",
+          "description": "CRLV registered owner name.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "ownerCnpjCpf": {
+          "type": "string",
+          "description": "CRLV owner CNPJ or CPF.",
+          "minLength": 0,
+          "maxLength": 30
+        },
+        "cityUf": {
+          "type": "string",
+          "description": "City and State (UF).",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "licensingStatus": {
+          "type": "string",
+          "description": "CRLV licensing status.",
+          "enum": ["EM_DIA", "PENDENTE", "VENCIDO"],
+          "minLength": 1,
+          "maxLength": 20
+        },
+        "activeFinesCount": {
+          "type": "number",
+          "description": "Count of active traffic fines."
+        },
+        "totalFinesValue": {
+          "type": "number",
+          "description": "Total amount of traffic fines."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last update timestamp."
+        }
+      },
+      "required": [
+        "id",
+        "ownerId",
+        "plate",
+        "renavam",
+        "chassis",
+        "brandModel",
+        "yearFabMod",
+        "vehicleType",
+        "fuel",
+        "color",
+        "ownerName",
+        "ownerCnpjCpf",
+        "cityUf",
+        "licensingStatus",
+        "activeFinesCount",
+        "totalFinesValue",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "TrafficFine": {
+      "title": "TrafficFine",
+      "description": "Traffic infraction notice (AIT) imported via PDF or registered manually.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique fine identifier.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the record owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "aitNumber": {
+          "type": "string",
+          "description": "Official AIT number.",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "plate": {
+          "type": "string",
+          "description": "Vehicle license plate.",
+          "minLength": 5,
+          "maxLength": 15
+        },
+        "infractionDate": {
+          "type": "string",
+          "description": "Date and time of infraction.",
+          "minLength": 8,
+          "maxLength": 35
+        },
+        "infractionLocation": {
+          "type": "string",
+          "description": "Location of the infraction.",
+          "minLength": 1,
+          "maxLength": 250
+        },
+        "city": {
+          "type": "string",
+          "description": "City of infraction.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "state": {
+          "type": "string",
+          "description": "State UF code.",
+          "minLength": 2,
+          "maxLength": 10
+        },
+        "infractionCode": {
+          "type": "string",
+          "description": "CTB infraction code.",
+          "minLength": 1,
+          "maxLength": 20
+        },
+        "infractionDescription": {
+          "type": "string",
+          "description": "CTB infraction description.",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "fineAmount": {
+          "type": "number",
+          "description": "Final fine amount in BRL."
+        },
+        "originalAmount": {
+          "type": "number",
+          "description": "Base fine amount before multiplier."
+        },
+        "isDoubledFine": {
+          "type": "boolean",
+          "description": "Whether fine is doubled (2x NIC PJ)."
+        },
+        "multiplierFactor": {
+          "type": "number",
+          "description": "Multiplier factor (1, 2, 3, 5, 10)."
+        },
+        "ownerCnpjRazaoSocial": {
+          "type": "string",
+          "description": "Owner name and document.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "driverId": {
+          "type": "string",
+          "description": "Assigned driver ID.",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "driverName": {
+          "type": "string",
+          "description": "Assigned driver name.",
+          "minLength": 0,
+          "maxLength": 160
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "Fine payment due date.",
+          "minLength": 8,
+          "maxLength": 25
+        },
+        "status": {
+          "type": "string",
+          "description": "Current fine status.",
+          "enum": ["PENDENTE", "VENCIDA", "PAGA", "EM_RECURSO"],
+          "minLength": 1,
+          "maxLength": 20
+        },
+        "severity": {
+          "type": "string",
+          "description": "Infraction severity.",
+          "enum": ["LEVE", "MEDIA", "GRAVE", "GRAVISSIMA"],
+          "minLength": 1,
+          "maxLength": 20
+        },
+        "points": {
+          "type": "number",
+          "description": "CNH points assigned."
+        },
+        "issuingAuthority": {
+          "type": "string",
+          "description": "Issuing traffic authority.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "pdfFileName": {
+          "type": "string",
+          "description": "Imported PDF file name.",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last update timestamp."
+        }
+      },
+      "required": [
+        "id",
+        "ownerId",
+        "aitNumber",
+        "plate",
+        "infractionDate",
+        "infractionLocation",
+        "city",
+        "state",
+        "infractionCode",
+        "infractionDescription",
+        "fineAmount",
+        "originalAmount",
+        "isDoubledFine",
+        "multiplierFactor",
+        "ownerCnpjRazaoSocial",
+        "dueDate",
+        "status",
+        "severity",
+        "points",
+        "issuingAuthority",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DriverReceiptTerm": {
+      "title": "DriverReceiptTerm",
+      "description": "Driver acknowledgment and payroll deduction receipt term.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique term identifier.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the record owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "protocolNumber": {
+          "type": "string",
+          "description": "Term protocol number.",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "aitNumber": {
+          "type": "string",
+          "description": "Related AIT number.",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "plate": {
+          "type": "string",
+          "description": "Related vehicle plate.",
+          "minLength": 5,
+          "maxLength": 15
+        },
+        "driverName": {
+          "type": "string",
+          "description": "Driver full name.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "driverCpf": {
+          "type": "string",
+          "description": "Driver CPF.",
+          "minLength": 1,
+          "maxLength": 25
+        },
+        "driverCnh": {
+          "type": "string",
+          "description": "Driver CNH.",
+          "minLength": 1,
+          "maxLength": 30
+        },
+        "originalFineAmount": {
+          "type": "number",
+          "description": "Original fine amount."
+        },
+        "finalDeductedAmount": {
+          "type": "number",
+          "description": "Final payroll deducted amount."
+        },
+        "installments": {
+          "type": "number",
+          "description": "Number of payroll installments."
+        },
+        "installmentValue": {
+          "type": "number",
+          "description": "Value per installment."
+        },
+        "payrollMonth": {
+          "type": "string",
+          "description": "Reference payroll month (YYYY-MM).",
+          "minLength": 4,
+          "maxLength": 20
+        },
+        "status": {
+          "type": "string",
+          "description": "Signature status of the receipt term.",
+          "enum": ["PENDENTE_ASSINATURA", "ASSINADO"],
+          "minLength": 1,
+          "maxLength": 30
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last update timestamp."
+        }
+      },
+      "required": [
+        "id",
+        "ownerId",
+        "protocolNumber",
+        "aitNumber",
+        "plate",
+        "driverName",
+        "driverCpf",
+        "driverCnh",
+        "originalFineAmount",
+        "finalDeductedAmount",
+        "installments",
+        "installmentValue",
+        "payrollMonth",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/admins/{adminId}": {
+      "schema": "AdminRecord",
+      "description": "Trusted administrator lookup collection."
+    },
+    "/drivers/{driverId}": {
+      "schema": "Driver",
+      "description": "Registered fleet drivers collection."
+    },
+    "/vehicles/{vehicleId}": {
+      "schema": "Vehicle",
+      "description": "Registered fleet vehicles collection."
+    },
+    "/fines/{fineId}": {
+      "schema": "TrafficFine",
+      "description": "Traffic fines and AIT notifications collection."
+    },
+    "/terms/{termId}": {
+      "schema": "DriverReceiptTerm",
+      "description": "Driver receipt and payroll deduction terms collection."
+    }
+  }
+}

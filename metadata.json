@@ -1,0 +1,10 @@
+{
+  "name": "Remix Gestão de Multas Pro v2",
+  "description": "Sistema de gerenciamento de multas e infrações para frotas e motoristas profissionais com importação CNH/CRLV/PDF, integração Detran e notificações em tempo real.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

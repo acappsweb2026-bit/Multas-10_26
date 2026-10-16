@@ -1,0 +1,476 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Connection Health Check Ping
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // 1. Global Safety Net (Default-Deny Catch-All)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Global Helpers
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'ac.appsweb2026@gmail.com'
+      );
+    }
+
+    // 3. Entity Validation Blueprints
+    function isValidDriver(data) {
+      return data.keys().hasAll([
+        'id',
+        'ownerId',
+        'name',
+        'cpf',
+        'cnhNumber',
+        'cnhCategory',
+        'cnhExpiration',
+        'currentPoints',
+        'status',
+        'phone',
+        'email',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id',
+        'ownerId',
+        'name',
+        'cpf',
+        'cnhNumber',
+        'cnhCategory',
+        'cnhExpiration',
+        'currentPoints',
+        'status',
+        'phone',
+        'email',
+        'assignedVehiclePlate',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      isValidId(data.id) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 160 &&
+      data.cpf is string && data.cpf.size() >= 11 && data.cpf.size() <= 20 &&
+      data.cnhNumber is string && data.cnhNumber.size() >= 5 && data.cnhNumber.size() <= 30 &&
+      data.cnhCategory is string && data.cnhCategory.size() >= 1 && data.cnhCategory.size() <= 5 &&
+      data.cnhCategory in ['A', 'B', 'C', 'D', 'E', 'AB', 'AC', 'AD', 'AE'] &&
+      data.cnhExpiration is string && data.cnhExpiration.size() >= 8 && data.cnhExpiration.size() <= 25 &&
+      data.currentPoints is number && data.currentPoints >= 0 && data.currentPoints <= 1000 &&
+      data.status is string && data.status.size() >= 1 && data.status.size() <= 20 &&
+      data.status in ['REGULAR', 'ALERTA', 'SUSPENSA', 'CASSADA'] &&
+      data.phone is string && data.phone.size() <= 40 &&
+      data.email is string && data.email.size() <= 254 &&
+      (!('assignedVehiclePlate' in data) || (data.assignedVehiclePlate is string && data.assignedVehiclePlate.size() <= 20)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidVehicle(data) {
+      return data.keys().hasAll([
+        'id',
+        'ownerId',
+        'plate',
+        'renavam',
+        'chassis',
+        'brandModel',
+        'yearFabMod',
+        'vehicleType',
+        'fuel',
+        'color',
+        'ownerName',
+        'ownerCnpjCpf',
+        'cityUf',
+        'licensingStatus',
+        'activeFinesCount',
+        'totalFinesValue',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id',
+        'ownerId',
+        'plate',
+        'renavam',
+        'chassis',
+        'brandModel',
+        'yearFabMod',
+        'vehicleType',
+        'fuel',
+        'color',
+        'ownerName',
+        'ownerCnpjCpf',
+        'cityUf',
+        'licensingStatus',
+        'activeFinesCount',
+        'totalFinesValue',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      isValidId(data.id) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      data.plate is string && data.plate.size() >= 5 && data.plate.size() <= 15 &&
+      data.renavam is string && data.renavam.size() >= 5 && data.renavam.size() <= 20 &&
+      data.chassis is string && data.chassis.size() >= 5 && data.chassis.size() <= 30 &&
+      data.brandModel is string && data.brandModel.size() >= 1 && data.brandModel.size() <= 120 &&
+      data.yearFabMod is string && data.yearFabMod.size() >= 4 && data.yearFabMod.size() <= 20 &&
+      data.vehicleType is string && data.vehicleType.size() >= 1 && data.vehicleType.size() <= 40 &&
+      data.fuel is string && data.fuel.size() >= 1 && data.fuel.size() <= 40 &&
+      data.color is string && data.color.size() >= 1 && data.color.size() <= 40 &&
+      data.ownerName is string && data.ownerName.size() >= 1 && data.ownerName.size() <= 160 &&
+      data.ownerCnpjCpf is string && data.ownerCnpjCpf.size() <= 30 &&
+      data.cityUf is string && data.cityUf.size() >= 1 && data.cityUf.size() <= 80 &&
+      data.licensingStatus is string && data.licensingStatus.size() >= 1 && data.licensingStatus.size() <= 20 &&
+      data.licensingStatus in ['EM_DIA', 'PENDENTE', 'VENCIDO'] &&
+      data.activeFinesCount is number && data.activeFinesCount >= 0 && data.activeFinesCount <= 100000 &&
+      data.totalFinesValue is number && data.totalFinesValue >= 0 && data.totalFinesValue <= 100000000 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidFine(data) {
+      return data.keys().hasAll([
+        'id',
+        'ownerId',
+        'aitNumber',
+        'plate',
+        'infractionDate',
+        'infractionLocation',
+        'city',
+        'state',
+        'infractionCode',
+        'infractionDescription',
+        'fineAmount',
+        'originalAmount',
+        'isDoubledFine',
+        'multiplierFactor',
+        'ownerCnpjRazaoSocial',
+        'dueDate',
+        'status',
+        'severity',
+        'points',
+        'issuingAuthority',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id',
+        'ownerId',
+        'aitNumber',
+        'plate',
+        'infractionDate',
+        'infractionLocation',
+        'city',
+        'state',
+        'infractionCode',
+        'infractionDescription',
+        'fineAmount',
+        'originalAmount',
+        'isDoubledFine',
+        'multiplierFactor',
+        'ownerCnpjRazaoSocial',
+        'driverId',
+        'driverName',
+        'dueDate',
+        'status',
+        'severity',
+        'points',
+        'issuingAuthority',
+        'pdfFileName',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      isValidId(data.id) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      data.aitNumber is string && data.aitNumber.size() >= 1 && data.aitNumber.size() <= 60 &&
+      data.plate is string && data.plate.size() >= 5 && data.plate.size() <= 15 &&
+      data.infractionDate is string && data.infractionDate.size() >= 8 && data.infractionDate.size() <= 35 &&
+      data.infractionLocation is string && data.infractionLocation.size() >= 1 && data.infractionLocation.size() <= 250 &&
+      data.city is string && data.city.size() >= 1 && data.city.size() <= 100 &&
+      data.state is string && data.state.size() >= 2 && data.state.size() <= 10 &&
+      data.infractionCode is string && data.infractionCode.size() >= 1 && data.infractionCode.size() <= 20 &&
+      data.infractionDescription is string && data.infractionDescription.size() >= 1 && data.infractionDescription.size() <= 500 &&
+      data.fineAmount is number && data.fineAmount >= 0 && data.fineAmount <= 10000000 &&
+      data.originalAmount is number && data.originalAmount >= 0 && data.originalAmount <= 10000000 &&
+      data.isDoubledFine is bool &&
+      data.multiplierFactor is number && data.multiplierFactor >= 1 && data.multiplierFactor <= 20 &&
+      data.ownerCnpjRazaoSocial is string && data.ownerCnpjRazaoSocial.size() >= 1 && data.ownerCnpjRazaoSocial.size() <= 200 &&
+      (!('driverId' in data) || (data.driverId is string && data.driverId.size() <= 128)) &&
+      (!('driverName' in data) || (data.driverName is string && data.driverName.size() <= 160)) &&
+      data.dueDate is string && data.dueDate.size() >= 8 && data.dueDate.size() <= 25 &&
+      data.status is string && data.status.size() >= 1 && data.status.size() <= 20 &&
+      data.status in ['PENDENTE', 'VENCIDA', 'PAGA', 'EM_RECURSO'] &&
+      data.severity is string && data.severity.size() >= 1 && data.severity.size() <= 20 &&
+      data.severity in ['LEVE', 'MEDIA', 'GRAVE', 'GRAVISSIMA'] &&
+      data.points is number && data.points >= 0 && data.points <= 100 &&
+      data.issuingAuthority is string && data.issuingAuthority.size() >= 1 && data.issuingAuthority.size() <= 40 &&
+      (!('pdfFileName' in data) || (data.pdfFileName is string && data.pdfFileName.size() <= 200)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidTerm(data) {
+      return data.keys().hasAll([
+        'id',
+        'ownerId',
+        'protocolNumber',
+        'aitNumber',
+        'plate',
+        'driverName',
+        'driverCpf',
+        'driverCnh',
+        'originalFineAmount',
+        'finalDeductedAmount',
+        'installments',
+        'installmentValue',
+        'payrollMonth',
+        'status',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id',
+        'ownerId',
+        'protocolNumber',
+        'aitNumber',
+        'plate',
+        'driverName',
+        'driverCpf',
+        'driverCnh',
+        'originalFineAmount',
+        'finalDeductedAmount',
+        'installments',
+        'installmentValue',
+        'payrollMonth',
+        'status',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      isValidId(data.id) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      data.protocolNumber is string && data.protocolNumber.size() >= 1 && data.protocolNumber.size() <= 60 &&
+      data.aitNumber is string && data.aitNumber.size() >= 1 && data.aitNumber.size() <= 60 &&
+      data.plate is string && data.plate.size() >= 5 && data.plate.size() <= 15 &&
+      data.driverName is string && data.driverName.size() >= 1 && data.driverName.size() <= 160 &&
+      data.driverCpf is string && data.driverCpf.size() >= 1 && data.driverCpf.size() <= 25 &&
+      data.driverCnh is string && data.driverCnh.size() >= 1 && data.driverCnh.size() <= 30 &&
+      data.originalFineAmount is number && data.originalFineAmount >= 0 && data.originalFineAmount <= 10000000 &&
+      data.finalDeductedAmount is number && data.finalDeductedAmount >= 0 && data.finalDeductedAmount <= 10000000 &&
+      data.installments is number && data.installments >= 1 && data.installments <= 60 &&
+      data.installmentValue is number && data.installmentValue >= 0 && data.installmentValue <= 10000000 &&
+      data.payrollMonth is string && data.payrollMonth.size() >= 4 && data.payrollMonth.size() <= 20 &&
+      data.status is string && data.status.size() >= 1 && data.status.size() <= 30 &&
+      data.status in ['PENDENTE_ASSINATURA', 'ASSINADO'] &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // 4. Collection Rules
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && request.auth.uid == adminId;
+      allow list, create, update, delete: if false;
+    }
+
+    match /drivers/{driverId} {
+      allow get: if isSignedIn() && isValidId(driverId) && (existing().ownerId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isVerifiedUser() && isValidId(driverId) && isValidDriver(incoming()) &&
+        incoming().id == driverId &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if (
+        isVerifiedUser() && isValidId(driverId) && isValidDriver(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().id == existing().id &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (existing().status != 'CASSADA' || isAdmin()) && (
+          isAdmin() ||
+          // Action: UpdatePointsOrStatus
+          (incoming().diff(existing()).affectedKeys().hasOnly(['currentPoints', 'status', 'updatedAt'])) ||
+          // Action: EditDriverProfile
+          (incoming().diff(existing()).affectedKeys().hasOnly([
+            'name',
+            'cpf',
+            'cnhNumber',
+            'cnhCategory',
+            'cnhExpiration',
+            'currentPoints',
+            'status',
+            'phone',
+            'email',
+            'assignedVehiclePlate',
+            'updatedAt'
+          ]))
+        )
+      );
+      allow delete: if isVerifiedUser() && isValidId(driverId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /vehicles/{vehicleId} {
+      allow get: if isSignedIn() && isValidId(vehicleId) && (existing().ownerId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isVerifiedUser() && isValidId(vehicleId) && isValidVehicle(incoming()) &&
+        incoming().id == vehicleId &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if (
+        isVerifiedUser() && isValidId(vehicleId) && isValidVehicle(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().id == existing().id &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          // Action: UpdateLicensingStatus
+          (incoming().diff(existing()).affectedKeys().hasOnly(['licensingStatus', 'activeFinesCount', 'totalFinesValue', 'updatedAt'])) ||
+          // Action: EditVehicleDetails
+          (incoming().diff(existing()).affectedKeys().hasOnly([
+            'plate',
+            'renavam',
+            'chassis',
+            'brandModel',
+            'yearFabMod',
+            'vehicleType',
+            'fuel',
+            'color',
+            'ownerName',
+            'ownerCnpjCpf',
+            'cityUf',
+            'licensingStatus',
+            'activeFinesCount',
+            'totalFinesValue',
+            'updatedAt'
+          ]))
+        )
+      );
+      allow delete: if isVerifiedUser() && isValidId(vehicleId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /fines/{fineId} {
+      allow get: if isSignedIn() && isValidId(fineId) && (existing().ownerId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isVerifiedUser() && isValidId(fineId) && isValidFine(incoming()) &&
+        incoming().id == fineId &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if (
+        isVerifiedUser() && isValidId(fineId) && isValidFine(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().id == existing().id &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (existing().status != 'PAGA' || isAdmin()) && (
+          isAdmin() ||
+          // Action: UpdateFineStatus (Pay or Appeal)
+          (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])) ||
+          // Action: ToggleDoubledFine (2x NIC PJ)
+          (incoming().diff(existing()).affectedKeys().hasOnly([
+            'fineAmount',
+            'originalAmount',
+            'isDoubledFine',
+            'multiplierFactor',
+            'points',
+            'updatedAt'
+          ])) ||
+          // Action: EditFineDetails
+          (incoming().diff(existing()).affectedKeys().hasOnly([
+            'aitNumber',
+            'plate',
+            'infractionDate',
+            'infractionLocation',
+            'city',
+            'state',
+            'infractionCode',
+            'infractionDescription',
+            'fineAmount',
+            'originalAmount',
+            'isDoubledFine',
+            'multiplierFactor',
+            'ownerCnpjRazaoSocial',
+            'driverId',
+            'driverName',
+            'dueDate',
+            'status',
+            'severity',
+            'points',
+            'issuingAuthority',
+            'pdfFileName',
+            'updatedAt'
+          ]))
+        )
+      );
+      allow delete: if isVerifiedUser() && isValidId(fineId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /terms/{termId} {
+      allow get: if isSignedIn() && isValidId(termId) && (existing().ownerId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isVerifiedUser() && isValidId(termId) && isValidTerm(incoming()) &&
+        incoming().id == termId &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if (
+        isVerifiedUser() && isValidId(termId) && isValidTerm(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().id == existing().id &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (existing().status != 'ASSINADO' || isAdmin()) && (
+          isAdmin() ||
+          // Action: SignTerm
+          (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])) ||
+          // Action: EditTermDetails
+          (incoming().diff(existing()).affectedKeys().hasOnly([
+            'protocolNumber',
+            'aitNumber',
+            'plate',
+            'driverName',
+            'driverCpf',
+            'driverCnh',
+            'originalFineAmount',
+            'finalDeductedAmount',
+            'installments',
+            'installmentValue',
+            'payrollMonth',
+            'status',
+            'updatedAt'
+          ]))
+        )
+      );
+      allow delete: if isVerifiedUser() && isValidId(termId) && (existing().ownerId == request.auth.uid || isAdmin());
+    }
+  }
+}

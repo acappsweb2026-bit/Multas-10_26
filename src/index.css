@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+}
+
+/* Global Light Theme overrides for any legacy dark utility classes inside cards/modals */
+.light-app-shell .bg-slate-950,
+.light-app-shell .bg-slate-950\/70,
+.light-app-shell .bg-slate-950\/60,
+.light-app-shell .bg-slate-950\/50,
+.light-app-shell .bg-slate-950\/40,
+.light-app-shell .bg-slate-950\/30,
+.light-app-shell .bg-slate-950\/20 {
+  background-color: #f8fafc !important;
+}
+
+.light-app-shell .bg-slate-900,
+.light-app-shell .bg-slate-900\/95,
+.light-app-shell .bg-slate-900\/90,
+.light-app-shell .bg-slate-900\/80 {
+  background-color: #ffffff !important;
+}
+
+.light-app-shell .bg-slate-800,
+.light-app-shell .bg-slate-800\/90,
+.light-app-shell .bg-slate-800\/80,
+.light-app-shell .bg-slate-800\/70,
+.light-app-shell .bg-slate-800\/50 {
+  background-color: #f1f5f9 !important;
+}
+
+.light-app-shell .border-slate-800,
+.light-app-shell .border-slate-800\/80,
+.light-app-shell .border-slate-800\/60,
+.light-app-shell .border-slate-700,
+.light-app-shell .border-slate-700\/80,
+.light-app-shell .border-slate-700\/60 {
+  border-color: #e2e8f0 !important;
+}
+
+.light-app-shell .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]),
+.light-app-shell .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e2e8f0 !important;
+}
+
+.light-app-shell .text-slate-100,
+.light-app-shell .text-slate-200 {
+  color: #0f172a !important;
+}
+
+.light-app-shell .text-slate-300 {
+  color: #334155 !important;
+}
+
+.light-app-shell .text-slate-400 {
+  color: #475569 !important;
+}
+
+.light-app-shell .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* Keep white text on colored solid buttons & Mercosul header */
+.light-app-shell .bg-blue-600,
+.light-app-shell .bg-blue-700,
+.light-app-shell .bg-emerald-600,
+.light-app-shell .bg-red-600,
+.light-app-shell .bg-amber-600,
+.light-app-shell .bg-indigo-600,
+.light-app-shell .from-blue-600,
+.light-app-shell .from-emerald-600,
+.light-app-shell .from-red-600,
+.light-app-shell .from-amber-600 {
+  color: #ffffff !important;
+}
+
+.light-app-shell .bg-blue-600 span,
+.light-app-shell .bg-blue-700 span,
+.light-app-shell .bg-emerald-600 span,
+.light-app-shell .bg-red-600 span,
+.light-app-shell .from-blue-600 span,
+.light-app-shell .from-emerald-600 span,
+.light-app-shell .from-red-600 span,
+.light-app-shell .from-amber-600 span {
+  color: #ffffff !important;
+}
+
+/* Convert text-white on light cards to slate-900 unless inside a colored badge/button */
+.light-app-shell h1.text-white,
+.light-app-shell h2.text-white,
+.light-app-shell h3.text-white,
+.light-app-shell h4.text-white,
+.light-app-shell p.text-white,
+.light-app-shell span.text-white:not(.bg-blue-600 *):not(.bg-red-500):not(.bg-emerald-600 *) {
+  color: #0f172a !important;
+}
+
+.light-app-shell input.text-white,
+.light-app-shell select.text-white,
+.light-app-shell textarea.text-white {
+  color: #0f172a !important;
+}
+
+/* Enhance readable semantic colors on light backgrounds */
+.light-app-shell .text-blue-400,
+.light-app-shell .text-blue-300 {
+  color: #1d4ed8 !important;
+}
+
+.light-app-shell .text-emerald-400,
+.light-app-shell .text-emerald-300 {
+  color: #047857 !important;
+}
+
+.light-app-shell .text-amber-400,
+.light-app-shell .text-amber-300 {
+  color: #b45309 !important;
+}
+
+.light-app-shell .text-red-400,
+.light-app-shell .text-red-300,
+.light-app-shell .text-red-200 {
+  color: #b91c1c !important;
+}
+
+.light-app-shell .text-purple-400,
+.light-app-shell .text-purple-300 {
+  color: #6d28d9 !important;
+}
+
+.light-app-shell .bg-blue-950\/80,
+.light-app-shell .bg-red-950\/80,
+.light-app-shell .bg-red-950\/60,
+.light-app-shell .bg-red-950\/40 {
+  background-color: #fef2f2 !important;
+}
+
+.light-app-shell .from-red-950\/40,
+.light-app-shell .from-slate-900,
+.light-app-shell .via-slate-900,
+.light-app-shell .to-slate-900,
+.light-app-shell .to-slate-850,
+.light-app-shell .from-slate-950,
+.light-app-shell .to-slate-950 {
+  --tw-gradient-from: #ffffff !important;
+  --tw-gradient-via: #f8fafc !important;
+  --tw-gradient-to: #f1f5f9 !important;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  #main-app-navbar,
+  #main-app-sidebar,
+  .no-print {
+    display: none !important;
+  }
+  .print-only-sheet {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Custom visible scrollbar for CRM sidebar menu */
+.crm-menu-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.crm-menu-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+.crm-menu-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.crm-menu-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
